@@ -939,7 +939,6 @@ const ViewCoachModal = ({
       setShowRejectModal(false);
       setRejectedFields([]);
       setRejectionReason('');
-      setRejectType('changes_required');
       onUpdate();
       onClose();
     } catch (error) {
@@ -1351,7 +1350,6 @@ const ViewCoachModal = ({
                 setShowRejectModal(false);
                 setRejectedFields([]);
                 setRejectionReason('');
-                setRejectType('changes_required');
               }}>
                 Cancel
               </button>
