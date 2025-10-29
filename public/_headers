@@ -1,0 +1,6 @@
+/strategies/*/videos/*
+  Content-Security-Policy: default-src 'self'; media-src 'self' https://storage.googleapis.com; script-src 'self' 'unsafe-inline'
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: no-referrer
+

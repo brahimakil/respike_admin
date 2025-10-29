@@ -1,0 +1,285 @@
+/* Users Page Styles */
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+}
+
+.coach-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  background: var(--primary);
+  color: white;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.no-coach-text {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+/* Coach Filter Section */
+.coach-filter-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.coach-filter-section label {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.coach-filter-select {
+  flex: 1;
+  max-width: 500px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.coach-filter-select:hover {
+  border-color: var(--primary);
+}
+
+.coach-filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.coach-filter-select optgroup {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.coach-filter-select option {
+  padding: 0.5rem;
+}
+
+/* User Details Modal */
+.user-details {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius);
+}
+
+.profile-section .profile-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--border-color);
+}
+
+.profile-section h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+/* Info Box */
+.info-box {
+  padding: 1rem;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--primary);
+  border-radius: var(--border-radius-sm);
+  margin-top: 1rem;
+}
+
+.info-box strong {
+  color: var(--primary);
+}
+
+/* Coach Select Dropdown */
+.coach-select {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 500;
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.coach-select:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.1);
+}
+
+.coach-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.coach-select option {
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.coach-select optgroup {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--primary);
+  background: var(--bg-tertiary);
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Ban Modal Styles */
+.ban-modal {
+  max-width: 500px;
+}
+
+.ban-modal-body {
+  padding: 2rem;
+}
+
+.ban-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  border: 1px solid #ffcccc;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.ban-user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ff4444;
+}
+
+.ban-user-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.ban-user-info p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.ban-label {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.ban-help-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.ban-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.ban-textarea:focus {
+  outline: none;
+  border-color: #ff4444;
+  box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1);
+}
+
+.ban-textarea::placeholder {
+  color: #999;
+  font-size: 0.95rem;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .coach-filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .coach-filter-select {
+    max-width: none;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .profile-section .profile-photo {
+    width: 100px;
+    height: 100px;
+  }
+}
+
