@@ -37,11 +37,6 @@ interface Coach {
   email: string;
 }
 
-interface CashoutRequest {
-  amount: number;
-  walletAddress: string;
-  currency: string;
-}
 
 export const SystemWallet = () => {
   const [systemWallet, setSystemWallet] = useState<Wallet | null>(null);

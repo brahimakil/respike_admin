@@ -341,7 +341,7 @@ export const Dashboard = () => {
                         fill="#8884d8"
                         dataKey="value"
                       >
-                        {stats.charts.strategyDistribution.map((entry: any, index: number) => (
+                        {stats.charts.strategyDistribution.map((_entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>

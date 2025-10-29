@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Subscription } from '../types';
 
 interface ViewSubscriptionModalProps {
@@ -116,7 +115,7 @@ export const ViewSubscriptionModal = ({ subscription, onClose }: ViewSubscriptio
             </div>
 
             <div className="video-progress-list">
-              {subscription.videoProgress.map((video, index) => (
+              {subscription.videoProgress.map((video) => (
                 <div
                   key={video.videoId}
                   className={`video-progress-item ${video.isCompleted ? 'completed' : ''} ${

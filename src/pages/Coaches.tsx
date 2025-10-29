@@ -10,7 +10,7 @@ interface Coach {
   phoneNumber: string;
   city: string;
   country: string;
-  status: 'pending' | 'approved' | 'rejected' | 'banned';
+  status: 'pending' | 'approved' | 'rejected' | 'banned' | 'completely_rejected';
   submittedAt: string;
   profilePhotoUrl: string;
   idFrontPhotoUrl: string;
@@ -884,7 +884,6 @@ const ViewCoachModal = ({
   const [showBanModal, setShowBanModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejectedFields, setRejectedFields] = useState<string[]>([]);
-  const [rejectType, setRejectType] = useState<'changes_required' | 'completely_rejected'>('changes_required');
 
   const handleApprove = async () => {
     if (!confirm('Are you sure you want to approve this coach?')) return;
@@ -1437,7 +1436,7 @@ const CoachUsersModal = ({
     }
   };
 
-  const handleUpdateCommission = async (userId: string, uid: string) => {
+  const handleUpdateCommission = async (_userId: string, uid: string) => {
     try {
       const commissionPercentage = commissionValue === '' ? null : parseFloat(commissionValue);
       
