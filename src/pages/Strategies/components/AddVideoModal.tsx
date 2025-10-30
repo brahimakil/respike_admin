@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '../../../services/api';
+import { storageService } from '../../../services/storage.service';
 
 interface AddVideoModalProps {
   strategyId: string;
@@ -19,6 +20,7 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState('');
 
   const handleCoverPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,32 +57,35 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
     setLoading(true);
     setError('');
     setUploadProgress(0);
+    setUploadStatus('');
 
     try {
       let videoUrl = '';
       let coverPhotoUrl = '';
 
-      // Upload video first
-      setUploadProgress(10);
-      const videoFormData = new FormData();
-      videoFormData.append('video', video);
-      
+      // Upload video directly to Firebase Storage
+      setUploadStatus(`Uploading video (${storageService.formatBytes(video.size)})...`);
       try {
-        const videoUploadResponse = await api.post(`/strategies/${strategyId}/videos/upload-video`, videoFormData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+        videoUrl = await storageService.uploadVideo(video, strategyId, (progress) => {
+          const percentage = Math.round(progress.progress * 0.7); // 70% of total progress
+          setUploadProgress(percentage);
+          setUploadStatus(
+            `Uploading video: ${storageService.formatBytes(progress.bytesTransferred)} / ${storageService.formatBytes(progress.totalBytes)} (${Math.round(progress.progress)}%)`
+          );
         });
-        videoUrl = videoUploadResponse.data.url;
-        setUploadProgress(50);
+        setUploadProgress(70);
+        setUploadStatus('Video uploaded successfully! ✅');
       } catch (uploadError) {
         console.error('Error uploading video:', uploadError);
-        setError('Failed to upload video');
+        setError('Failed to upload video. Please check your connection and try again.');
         setLoading(false);
         return;
       }
 
-      // Upload cover photo if provided
+      // Upload cover photo if provided (still through backend - small files)
       if (coverPhoto) {
-        setUploadProgress(60);
+        setUploadProgress(75);
+        setUploadStatus('Uploading cover photo...');
         const coverFormData = new FormData();
         coverFormData.append('cover', coverPhoto);
         
@@ -89,14 +94,16 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
             headers: { 'Content-Type': 'multipart/form-data' },
           });
           coverPhotoUrl = coverUploadResponse.data.url;
-          setUploadProgress(80);
+          setUploadProgress(85);
         } catch (uploadError) {
           console.error('Error uploading cover photo:', uploadError);
+          // Continue even if cover photo fails
         }
       }
 
-      // Create video record
+      // Create video record in database
       setUploadProgress(90);
+      setUploadStatus('Saving video details...');
       await api.post(`/strategies/${strategyId}/videos`, {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -105,6 +112,7 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
       });
 
       setUploadProgress(100);
+      setUploadStatus('Video added successfully! 🎉');
       onSuccess();
     } catch (error: any) {
       console.error('Error creating video:', error);
@@ -147,8 +155,8 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
                 <label htmlFor="video-file-input" className="video-upload-label">
                   <div className="upload-placeholder">
                     <span className="upload-icon">🎬</span>
-                    <span>{video ? video.name : 'Click to upload video'}</span>
-                    <span className="upload-hint">Supported: MP4, WebM, MOV</span>
+                    <span>{video ? `${video.name} (${storageService.formatBytes(video.size)})` : 'Click to upload video'}</span>
+                    <span className="upload-hint">Supported: MP4, WebM, MOV • Max: 1GB</span>
                   </div>
                 </label>
               </div>
@@ -217,7 +225,8 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
                 <div className="progress-bar">
                   <div className="progress-fill" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
-                <p>Uploading... {uploadProgress}%</p>
+                <p className="upload-status">{uploadStatus}</p>
+                <p className="upload-percentage">{uploadProgress}%</p>
               </div>
             )}
           </div>

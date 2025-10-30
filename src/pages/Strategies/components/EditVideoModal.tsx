@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../../../services/api';
 import type { StrategyVideo } from '../types';
+import { storageService } from '../../../services/storage.service';
 
 interface EditVideoModalProps {
   strategyId: string;
@@ -20,6 +21,7 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState('');
 
   const handleCoverPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,34 +53,37 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
     setLoading(true);
     setError('');
     setUploadProgress(0);
+    setUploadStatus('');
 
     try {
       let videoUrl = video.videoUrl;
       let coverPhotoUrl = coverPhotoPreview;
 
-      // Upload new video if provided
+      // Upload new video if provided (directly to Firebase Storage)
       if (newVideo) {
-        setUploadProgress(10);
-        const videoFormData = new FormData();
-        videoFormData.append('video', newVideo);
-        
+        setUploadStatus(`Uploading new video (${storageService.formatBytes(newVideo.size)})...`);
         try {
-          const videoUploadResponse = await api.post(`/strategies/${strategyId}/videos/upload-video`, videoFormData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
+          videoUrl = await storageService.uploadVideo(newVideo, strategyId, (progress) => {
+            const percentage = Math.round(progress.progress * 0.7); // 70% of total progress
+            setUploadProgress(percentage);
+            setUploadStatus(
+              `Uploading video: ${storageService.formatBytes(progress.bytesTransferred)} / ${storageService.formatBytes(progress.totalBytes)} (${Math.round(progress.progress)}%)`
+            );
           });
-          videoUrl = videoUploadResponse.data.url;
-          setUploadProgress(50);
+          setUploadProgress(70);
+          setUploadStatus('Video uploaded successfully! ✅');
         } catch (uploadError) {
           console.error('Error uploading video:', uploadError);
-          setError('Failed to upload video');
+          setError('Failed to upload video. Please check your connection and try again.');
           setLoading(false);
           return;
         }
       }
 
-      // Upload new cover photo if provided
+      // Upload new cover photo if provided (still through backend - small files)
       if (coverPhoto) {
-        setUploadProgress(60);
+        setUploadProgress(75);
+        setUploadStatus('Uploading cover photo...');
         const coverFormData = new FormData();
         coverFormData.append('cover', coverPhoto);
         
@@ -87,14 +92,16 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
             headers: { 'Content-Type': 'multipart/form-data' },
           });
           coverPhotoUrl = coverUploadResponse.data.url;
-          setUploadProgress(80);
+          setUploadProgress(85);
         } catch (uploadError) {
           console.error('Error uploading cover photo:', uploadError);
+          // Continue even if cover photo fails
         }
       }
 
-      // Update video record
+      // Update video record in database
       setUploadProgress(90);
+      setUploadStatus('Saving video details...');
       await api.put(`/strategies/${strategyId}/videos/${video.id}`, {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -103,6 +110,7 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
       });
 
       setUploadProgress(100);
+      setUploadStatus('Video updated successfully! 🎉');
       onSuccess();
     } catch (error: any) {
       console.error('Error updating video:', error);
@@ -145,8 +153,8 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
                 <label htmlFor="video-file-input-edit" className="video-upload-label">
                   <div className="upload-placeholder">
                     <span className="upload-icon">🎬</span>
-                    <span>{newVideo ? newVideo.name : 'Click to upload new video'}</span>
-                    <span className="upload-hint">Leave empty to keep current video</span>
+                    <span>{newVideo ? `${newVideo.name} (${storageService.formatBytes(newVideo.size)})` : 'Click to upload new video'}</span>
+                    <span className="upload-hint">Leave empty to keep current video • Max: 1GB</span>
                   </div>
                 </label>
               </div>
@@ -215,7 +223,8 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
                 <div className="progress-bar">
                   <div className="progress-fill" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
-                <p>Uploading... {uploadProgress}%</p>
+                <p className="upload-status">{uploadStatus}</p>
+                <p className="upload-percentage">{uploadProgress}%</p>
               </div>
             )}
           </div>
