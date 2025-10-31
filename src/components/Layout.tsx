@@ -3,6 +3,17 @@ import type { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { authService } from '../services/auth.service';
+import { 
+  MdDashboard, 
+  MdPeople, 
+  MdShowChart, 
+  MdAccountBalanceWallet, 
+  MdPayment, 
+  MdAdminPanelSettings, 
+  MdSubscriptions, 
+  MdSettings,
+  MdPerson
+} from 'react-icons/md';
 
 interface LayoutProps {
   children: ReactNode;
@@ -58,7 +69,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/dashboard'); closeSidebar(); }}
           >
-            <span className="nav-icon">📊</span>
+            <span className="nav-icon"><MdDashboard /></span>
             <span className="nav-text">Dashboard</span>
           </a>
           <a 
@@ -66,7 +77,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/coaches' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/coaches'); closeSidebar(); }}
           >
-            <span className="nav-icon">🧑‍🏫</span>
+            <span className="nav-icon"><MdPerson /></span>
             <span className="nav-text">Coaches</span>
           </a>
           <a 
@@ -74,7 +85,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/users' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/users'); closeSidebar(); }}
           >
-            <span className="nav-icon">👥</span>
+            <span className="nav-icon"><MdPeople /></span>
             <span className="nav-text">Users</span>
           </a>
           <a 
@@ -82,7 +93,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/strategies' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/strategies'); closeSidebar(); }}
           >
-            <span className="nav-icon">📈</span>
+            <span className="nav-icon"><MdShowChart /></span>
             <span className="nav-text">Strategies</span>
           </a>
           <a 
@@ -90,7 +101,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/system-wallet' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/system-wallet'); closeSidebar(); }}
           >
-            <span className="nav-icon">💰</span>
+            <span className="nav-icon"><MdAccountBalanceWallet /></span>
             <span className="nav-text">System Wallet</span>
           </a>
           <a 
@@ -98,7 +109,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/payments-management' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/payments-management'); closeSidebar(); }}
           >
-            <span className="nav-icon">💳</span>
+            <span className="nav-icon"><MdPayment /></span>
             <span className="nav-text">Payments Management</span>
           </a>
           <a 
@@ -106,7 +117,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/admin-management' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/admin-management'); closeSidebar(); }}
           >
-            <span className="nav-icon">👨‍💼</span>
+            <span className="nav-icon"><MdAdminPanelSettings /></span>
             <span className="nav-text">Admin Management</span>
           </a>
           <a 
@@ -114,7 +125,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/subscriptions' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/subscriptions'); closeSidebar(); }}
           >
-            <span className="nav-icon">📋</span>
+            <span className="nav-icon"><MdSubscriptions /></span>
             <span className="nav-text">Subscriptions</span>
           </a>
           <a 
@@ -122,7 +133,7 @@ export const Layout = ({ children }: LayoutProps) => {
             className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/settings'); closeSidebar(); }}
           >
-            <span className="nav-icon">⚙️</span>
+            <span className="nav-icon"><MdSettings /></span>
             <span className="nav-text">Settings</span>
           </a>
         </nav>
