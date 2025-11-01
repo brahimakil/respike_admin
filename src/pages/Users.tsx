@@ -32,6 +32,7 @@ export const Users = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const [coachFilter, setCoachFilter] = useState<string>('all');
@@ -264,6 +265,18 @@ export const Users = () => {
                               🚫
                             </button>
                           )}
+                          
+                          <button
+                            className="btn-icon danger"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setShowDeleteModal(true);
+                            }}
+                            title="Delete User"
+                          >
+                            🗑️
+                          </button>
+
                           {user.status === 'banned' && (
                             <button
                               className="btn-icon success"
@@ -428,6 +441,22 @@ export const Users = () => {
             }} 
             onSuccess={() => {
               setShowBanModal(false);
+              setSelectedUser(null);
+              fetchUsers();
+            }} 
+          />
+        )}
+
+        {/* Delete User Modal */}
+        {showDeleteModal && selectedUser && (
+          <DeleteUserModal 
+            user={selectedUser} 
+            onClose={() => {
+              setShowDeleteModal(false);
+              setSelectedUser(null);
+            }} 
+            onSuccess={() => {
+              setShowDeleteModal(false);
               setSelectedUser(null);
               fetchUsers();
             }} 
@@ -1154,3 +1183,159 @@ const ViewUserModal = ({
     </div>
   );
 };
+
+// Delete User Modal Component
+const DeleteUserModal = ({ 
+  user, 
+  onClose, 
+  onSuccess 
+}: { 
+  user: User; 
+  onClose: () => void; 
+  onSuccess: () => void;
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [activeSubscriptions, setActiveSubscriptions] = useState<any[]>([]);
+  const [loadingSubscriptions, setLoadingSubscriptions] = useState(true);
+
+  useEffect(() => {
+    fetchActiveSubscriptions();
+  }, []);
+
+  const fetchActiveSubscriptions = async () => {
+    try {
+      const response = await api.get(`/users/${user.id}/active-subscriptions`);
+      setActiveSubscriptions(response.data);
+    } catch (error) {
+      console.error('Error fetching active subscriptions:', error);
+    } finally {
+      setLoadingSubscriptions(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to permanently delete ${user.displayName || user.email}? This action cannot be undone!`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.post(`/users/${user.id}/delete`);
+      alert('User deleted successfully');
+      onSuccess();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>⚠️ Delete User</h2>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body">
+          <div className="warning-box" style={{ 
+            background: '#fee', 
+            border: '2px solid #fcc', 
+            padding: '1rem', 
+            borderRadius: '8px',
+            marginBottom: '1rem'
+          }}>
+            <h3 style={{ color: '#c00', marginTop: 0 }}>⚠️ Warning: Permanent Deletion</h3>
+            <p style={{ margin: '0.5rem 0' }}>
+              You are about to permanently delete <strong>{user.displayName || user.email}</strong>.
+            </p>
+            <p style={{ margin: '0.5rem 0' }}>
+              This will:
+            </p>
+            <ul style={{ marginLeft: '1.5rem' }}>
+              <li>Delete the user from Firebase Authentication</li>
+              <li>Delete all user data from Firestore</li>
+              <li>Delete all subscriptions associated with this user</li>
+            </ul>
+            <p style={{ color: '#c00', fontWeight: 'bold', marginBottom: 0 }}>
+              This action CANNOT be undone!
+            </p>
+          </div>
+
+          <div className="info-section">
+            <h3>User Information</h3>
+            <div className="info-grid">
+              <div className="info-item">
+                <label>Name:</label>
+                <span>{user.displayName || 'N/A'}</span>
+              </div>
+              <div className="info-item">
+                <label>Email:</label>
+                <span>{user.email}</span>
+              </div>
+              <div className="info-item">
+                <label>Status:</label>
+                <span className={`badge ${getStatusBadgeClass(user.status)}`}>
+                  {user.status}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="info-section">
+            <h3>Active Subscriptions</h3>
+            {loadingSubscriptions ? (
+              <p>Loading subscriptions...</p>
+            ) : activeSubscriptions.length === 0 ? (
+              <p style={{ color: '#666' }}>No active subscriptions</p>
+            ) : (
+              <div style={{ background: '#ffe', padding: '1rem', borderRadius: '8px', border: '1px solid #ffa' }}>
+                <p style={{ fontWeight: 'bold', marginTop: 0, color: '#880' }}>
+                  ⚠️ This user has {activeSubscriptions.length} active subscription(s):
+                </p>
+                <ul style={{ marginLeft: '1.5rem', marginBottom: 0 }}>
+                  {activeSubscriptions.map((sub) => (
+                    <li key={sub.id}>
+                      <strong>{sub.strategyName}</strong> - 
+                      Expires: {new Date(sub.endDate).toLocaleDateString()} - 
+                      Price: ${sub.strategyPrice || sub.amountPaid || 0}
+                    </li>
+                  ))}
+                </ul>
+                <p style={{ color: '#c00', marginTop: '0.5rem', marginBottom: 0 }}>
+                  All subscriptions will be permanently deleted!
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="modal-footer">
+            <button className="btn-secondary" onClick={onClose} disabled={loading}>
+              Cancel
+            </button>
+            <button 
+              className="btn-danger" 
+              onClick={handleDelete}
+              disabled={loading}
+              style={{ background: '#c00' }}
+            >
+              {loading ? 'Deleting...' : '🗑️ Permanently Delete User'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+function getStatusBadgeClass(status: string) {
+  switch (status) {
+    case 'active':
+      return 'badge-success';
+    case 'banned':
+      return 'badge-dark';
+    default:
+      return 'badge-secondary';
+  }
+}
