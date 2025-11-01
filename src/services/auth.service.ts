@@ -1,5 +1,4 @@
 import {
-  signInWithEmailAndPassword,
   signInWithCustomToken,
   signOut,
   type User,
@@ -48,12 +47,35 @@ export const authService = {
   },
 
   async login(data: LoginData): Promise<User> {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      data.email,
-      data.password,
-    );
-    return userCredential.user;
+    try {
+      console.log('🔵 Calling backend API to login admin...', data.email);
+      
+      // Call backend API to verify admin login
+      const response = await api.post('/auth/admin/login', data);
+      console.log('✅ Backend response:', response.data);
+      
+      const { token } = response.data;
+      
+      if (!token) {
+        throw new Error('No token received from backend');
+      }
+      
+      console.log('🔵 Signing in with custom token...');
+      // Sign in with the custom token from backend
+      const userCredential = await signInWithCustomToken(auth, token);
+      console.log('✅ Successfully signed in as admin:', userCredential.user.uid);
+      
+      return userCredential.user;
+    } catch (error: any) {
+      console.error('❌ Admin login error:', error);
+      
+      // Handle specific error messages
+      if (error.response?.status === 401) {
+        throw new Error('Invalid credentials or insufficient permissions. Admin accounts only.');
+      }
+      
+      throw new Error(error.response?.data?.message || error.message || 'Failed to login');
+    }
   },
 
   async logout(): Promise<void> {
