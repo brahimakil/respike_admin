@@ -1,6 +1,29 @@
 import { Layout } from '../components/Layout';
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import { 
+  MdSearch, 
+  MdPersonAdd, 
+  MdVisibility, 
+  MdEdit, 
+  MdBlock, 
+  MdCheckCircle, 
+  MdRefresh, 
+  MdEmail, 
+  MdPhone, 
+  MdPerson, 
+  MdCake, 
+  MdLocationOn, 
+  MdHome, 
+  MdBadge, 
+  MdAccessTime, 
+  MdDescription, 
+  MdBusiness,
+  MdDelete,
+  MdWarning,
+  MdCancel,
+  MdPeople
+} from 'react-icons/md';
 import './Coaches.css';
 
 interface Coach {
@@ -35,6 +58,7 @@ export const Coaches = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
   const [showUsersModal, setShowUsersModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -115,12 +139,14 @@ export const Coaches = () => {
         {/* Header Actions */}
         <div className="page-header">
           <div className="search-bar">
+            <MdSearch style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '1.25rem' }} />
             <input
               type="text"
-              placeholder="🔍 Search coaches by name, email, phone, or city..."
+              placeholder="Search coaches by name, email, phone, or city..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
+              style={{ paddingLeft: '2.75rem' }}
             />
           </div>
           <div className="header-actions">
@@ -128,7 +154,7 @@ export const Coaches = () => {
               className="btn-primary"
               onClick={() => setShowAddModal(true)}
             >
-              ➕ Add New Coach
+              <MdPersonAdd style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Add New Coach
             </button>
           </div>
         </div>
@@ -236,7 +262,7 @@ export const Coaches = () => {
                           }}
                           title="Click to view users"
                         >
-                          {(coach as any).userCount || 0} 👥
+                          {(coach as any).userCount || 0} <MdPeople style={{ verticalAlign: 'middle', marginLeft: '0.25rem' }} />
                         </button>
                       </td>
                       <td>
@@ -255,7 +281,7 @@ export const Coaches = () => {
                             }}
                             title="View Details"
                           >
-                            👁️
+                            <MdVisibility />
                           </button>
                           
                           {/* Show Edit button for all statuses except completely_rejected */}
@@ -268,7 +294,7 @@ export const Coaches = () => {
                               }}
                               title="Edit Coach"
                             >
-                              ✏️
+                              <MdEdit />
                             </button>
                           )}
 
@@ -291,7 +317,7 @@ export const Coaches = () => {
                               }}
                               title="Recover to Needs Changes"
                             >
-                              🔄
+                              <MdRefresh />
                             </button>
                           )}
                           
@@ -304,7 +330,7 @@ export const Coaches = () => {
                               }}
                               title="Ban Coach"
                             >
-                              🚫
+                              <MdBlock />
                             </button>
                           )}
                           {coach.status === 'banned' && (
@@ -322,9 +348,21 @@ export const Coaches = () => {
                               }}
                               title="Unban Coach"
                             >
-                              ✅
+                              <MdCheckCircle />
                             </button>
                           )}
+                          
+                          {/* Delete button */}
+                          <button
+                            className="btn-icon danger"
+                            onClick={() => {
+                              setSelectedCoach(coach);
+                              setShowDeleteModal(true);
+                            }}
+                            title="Delete Coach"
+                          >
+                            <MdDelete />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -491,6 +529,22 @@ export const Coaches = () => {
             }} 
           />
         )}
+
+        {/* Delete Coach Modal */}
+        {showDeleteModal && selectedCoach && (
+          <DeleteCoachModal
+            coach={selectedCoach}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setSelectedCoach(null);
+            }}
+            onSuccess={() => {
+              setShowDeleteModal(false);
+              setSelectedCoach(null);
+              fetchCoaches();
+            }}
+          />
+        )}
       </div>
     </Layout>
   );
@@ -598,7 +652,7 @@ const AddCoachModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
         <form onSubmit={handleSubmit} className="coach-form">
           {/* Personal Information Section */}
           <div className="form-section-card">
-            <h3 className="section-title">👤 Personal Information</h3>
+            <h3 className="section-title"><MdPerson style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Personal Information</h3>
             
             <div className="form-row">
               <div className="form-group">
@@ -701,7 +755,7 @@ const AddCoachModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
 
           {/* Experience Section */}
           <div className="form-section-card">
-            <h3 className="section-title">💼 Professional Experience</h3>
+            <h3 className="section-title"><MdBusiness style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Professional Experience</h3>
             
             <div className="form-group">
               <label>Years of Experience *</label>
@@ -755,7 +809,7 @@ const AddCoachModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
 
           {/* ID Document Section */}
           <div className="form-section-card">
-            <h3 className="section-title">🆔 Identity Verification</h3>
+            <h3 className="section-title"><MdBadge style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Identity Verification</h3>
             
             <div className="form-group">
               <label>Document Type *</label>
@@ -1177,7 +1231,7 @@ const ViewCoachModal = ({
                   }}
                   disabled={loading}
                 >
-                  🔄 Move to Pending for Review
+                  <MdRefresh style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Move to Pending for Review
                 </button>
                 <button 
                   className="btn-danger" 
@@ -1201,7 +1255,7 @@ const ViewCoachModal = ({
                   }}
                   disabled={loading}
                 >
-                  ❌ Completely Reject
+                  <MdCancel style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Completely Reject
                 </button>
               </>
             )}
@@ -1233,7 +1287,7 @@ const ViewCoachModal = ({
                   }}
                   disabled={loading}
                 >
-                  🔄 Recover to "Needs Changes"
+                  <MdRefresh style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Recover to "Needs Changes"
                 </button>
               </>
             )}
@@ -1244,7 +1298,7 @@ const ViewCoachModal = ({
                 onClick={handleBan}
                 disabled={loading}
               >
-                🚫 Ban Coach
+                <MdBlock style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Ban Coach
               </button>
             )}
 
@@ -1266,7 +1320,7 @@ const ViewCoachModal = ({
         <div className="modal-overlay" onClick={() => setShowRejectModal(false)}>
           <div className="modal-content rejection-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>❌ Reject Coach Application</h2>
+              <h2><MdCancel style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Reject Coach Application</h2>
               <button className="modal-close" onClick={() => setShowRejectModal(false)}>×</button>
             </div>
             
@@ -1282,19 +1336,19 @@ const ViewCoachModal = ({
                 
                 <div className="rejection-fields-grid">
                   {[
-                    { key: 'email', label: '📧 Email Address' },
-                    { key: 'phoneNumber', label: '📱 Phone Number' },
-                    { key: 'fullName', label: '👤 Full Name' },
-                    { key: 'dateOfBirth', label: '🎂 Date of Birth' },
-                    { key: 'postalCode', label: '📮 Postal Code' },
-                    { key: 'city', label: '🏙️ City' },
-                    { key: 'country', label: '🌍 Country' },
-                    { key: 'address', label: '🏠 Address' },
-                    { key: 'idType', label: '🆔 ID Type' },
-                    { key: 'profilePhoto', label: '📸 Profile Photo' },
-                    { key: 'idDocuments', label: '🪪 ID Documents (Passport/National ID)' },
-                    { key: 'yearsOfExperience', label: '⏱️ Years of Experience' },
-                    { key: 'description', label: '📝 Professional Background' },
+                    { key: 'email', label: 'Email Address' },
+                    { key: 'phoneNumber', label: 'Phone Number' },
+                    { key: 'fullName', label: 'Full Name' },
+                    { key: 'dateOfBirth', label: 'Date of Birth' },
+                    { key: 'postalCode', label: 'Postal Code' },
+                    { key: 'city', label: 'City' },
+                    { key: 'country', label: 'Country' },
+                    { key: 'address', label: 'Address' },
+                    { key: 'idType', label: 'ID Type' },
+                    { key: 'profilePhoto', label: 'Profile Photo' },
+                    { key: 'idDocuments', label: 'ID Documents (Passport/National ID)' },
+                    { key: 'yearsOfExperience', label: 'Years of Experience' },
+                    { key: 'description', label: 'Professional Background' },
                   ].map(({ key, label }) => (
                     <div
                       key={key}
@@ -1461,7 +1515,7 @@ const CoachUsersModal = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal coach-users-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>👥 Users Assigned to {coach.fullName}</h2>
+          <h2><MdPeople style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Users Assigned to {coach.fullName}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
@@ -1617,7 +1671,7 @@ const BanCoachModal = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content ban-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>🚫 Ban Coach</h2>
+          <h2><MdBlock style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Ban Coach</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
         
@@ -1667,10 +1721,171 @@ const BanCoachModal = ({
               Cancel
             </button>
             <button type="submit" className="btn-danger" disabled={loading}>
-              {loading ? 'Banning...' : '🚫 Ban Coach'}
+              {loading ? 'Banning...' : <><MdBlock style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Ban Coach</>}
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+};
+
+// Delete Coach Modal Component
+const DeleteCoachModal = ({
+  coach,
+  onClose,
+  onSuccess,
+}: {
+  coach: Coach;
+  onClose: () => void;
+  onSuccess: () => void;
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [activeUsers, setActiveUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [confirmText, setConfirmText] = useState('');
+
+  useEffect(() => {
+    fetchActiveUsers();
+  }, []);
+
+  const fetchActiveUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const response = await api.get(`/coaches/${coach.id}/active-users`);
+      setActiveUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching active users:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (confirmText.trim().toLowerCase() !== coach.fullName.trim().toLowerCase()) {
+      alert('Please type the coach name exactly to confirm deletion');
+      return;
+    }
+
+    if (!confirm(`⚠️ FINAL CONFIRMATION: Permanently delete ${coach.fullName}? This CANNOT be undone!`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.delete(`/coaches/${coach.id}`);
+      alert('✅ Coach deleted successfully');
+      onSuccess();
+    } catch (error: any) {
+      console.error('Error deleting coach:', error);
+      alert(error.response?.data?.message || 'Failed to delete coach');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2><MdWarning style={{ verticalAlign: 'middle', marginRight: '0.5rem', color: '#dc2626' }} /> Delete Coach</h2>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="modal-body">
+          <div className="warning-box">
+            <MdWarning style={{ fontSize: '2rem', color: '#dc2626' }} />
+            <div>
+              <h3>⚠️ Warning: Permanent Deletion</h3>
+              <p>This action will permanently delete this coach and all associated data. This cannot be undone!</p>
+            </div>
+          </div>
+
+          <div className="delete-user-info">
+            <img 
+              src={coach.profilePhotoUrl || 'https://via.placeholder.com/60'} 
+              alt={coach.fullName}
+              className="delete-user-avatar"
+            />
+            <div>
+              <h3>{coach.fullName}</h3>
+              <p><MdEmail style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} /> {coach.email}</p>
+              <p><MdPhone style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} /> {coach.phoneNumber}</p>
+              <p><MdBusiness style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} /> {coach.yearsOfExperience} years experience</p>
+            </div>
+          </div>
+
+          {loadingUsers ? (
+            <div style={{ textAlign: 'center', padding: '1rem' }}>
+              <div className="spinner"></div>
+              <p>Checking for assigned users...</p>
+            </div>
+          ) : (
+            <>
+              {activeUsers.length > 0 && (
+                <div className="warning-box" style={{ backgroundColor: '#fef2f2', borderColor: '#fca5a5' }}>
+                  <MdWarning style={{ fontSize: '1.5rem', color: '#dc2626' }} />
+                  <div>
+                    <h4 style={{ color: '#dc2626', margin: '0 0 0.5rem 0' }}>
+                      ⚠️ This coach has {activeUsers.length} assigned user(s)
+                    </h4>
+                    <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
+                      {activeUsers.slice(0, 5).map((user: any) => (
+                        <li key={user.id}>
+                          <strong>{user.displayName || user.email}</strong> - {user.email}
+                        </li>
+                      ))}
+                      {activeUsers.length > 5 && (
+                        <li>... and {activeUsers.length - 5} more user(s)</li>
+                      )}
+                    </ul>
+                    <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                      These users will lose their coach assignment if you proceed.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="info-box">
+                <h4>What will be deleted:</h4>
+                <ul>
+                  <li><MdCancel style={{ verticalAlign: 'middle', marginRight: '0.25rem', color: '#dc2626' }} /> Coach profile and all personal information</li>
+                  <li><MdCancel style={{ verticalAlign: 'middle', marginRight: '0.25rem', color: '#dc2626' }} /> All uploaded documents (photos, ID verification)</li>
+                  <li><MdCancel style={{ verticalAlign: 'middle', marginRight: '0.25rem', color: '#dc2626' }} /> Coach assignments from all users</li>
+                  <li><MdCancel style={{ verticalAlign: 'middle', marginRight: '0.25rem', color: '#dc2626' }} /> Historical records and audit trail</li>
+                </ul>
+              </div>
+
+              <div className="confirmation-section">
+                <label>
+                  <strong>Type the coach's full name to confirm:</strong>
+                  <span style={{ color: '#dc2626', marginLeft: '0.5rem' }}>{coach.fullName}</span>
+                </label>
+                <input
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="Type coach name here..."
+                  className="confirm-input"
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="modal-footer">
+          <button type="button" className="btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            className="btn-danger" 
+            onClick={handleDelete}
+            disabled={loading || loadingUsers || confirmText.trim().toLowerCase() !== coach.fullName.trim().toLowerCase()}
+          >
+            {loading ? 'Deleting...' : <><MdDelete style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Delete Coach Permanently</>}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1750,7 +1965,7 @@ const EditCoachModal = ({
 
           {/* Personal Information */}
           <div className="form-section-card">
-            <h3 className="section-title">👤 Personal Information</h3>
+            <h3 className="section-title"><MdPerson style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Personal Information</h3>
             
             <div className="form-row">
               <div className="form-group">
@@ -1846,7 +2061,7 @@ const EditCoachModal = ({
 
           {/* Professional Experience */}
           <div className="form-section-card">
-            <h3 className="section-title">💼 Professional Experience</h3>
+            <h3 className="section-title"><MdBusiness style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Professional Experience</h3>
             
             <div className="form-group">
               <label>Years of Experience *</label>

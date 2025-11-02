@@ -122,6 +122,15 @@
   font-size: 3rem;
   line-height: 1;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-icon svg {
+  width: 3rem;
+  height: 3rem;
+  color: #3b82f6;
 }
 
 .metric-content {
@@ -195,6 +204,15 @@
 
 .financial-icon {
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.financial-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6366f1;
 }
 
 .financial-header h4 {
@@ -245,34 +263,69 @@
 .action-icon {
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 1rem;
   border-radius: 50%;
   background: rgba(59, 130, 246, 0.1);
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.action-icon svg {
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 .action-icon.blue {
   background: rgba(59, 130, 246, 0.1);
 }
 
+.action-icon.blue svg {
+  color: #3b82f6;
+}
+
 .action-icon.green {
   background: rgba(16, 185, 129, 0.1);
+}
+
+.action-icon.green svg {
+  color: #10b981;
 }
 
 .action-icon.purple {
   background: rgba(139, 92, 246, 0.1);
 }
 
+.action-icon.purple svg {
+  color: #8b5cf6;
+}
+
 .action-icon.orange {
   background: rgba(245, 158, 11, 0.1);
+}
+
+.action-icon.orange svg {
+  color: #f59e0b;
 }
 
 .action-icon.pink {
   background: rgba(236, 72, 153, 0.1);
 }
 
+.action-icon.pink svg {
+  color: #ec4899;
+}
+
 .action-icon.cyan {
   background: rgba(6, 182, 212, 0.1);
+}
+
+.action-icon.cyan svg {
+  color: #06b6d4;
 }
 
 .quick-action-card h4 {

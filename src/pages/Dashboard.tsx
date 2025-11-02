@@ -17,6 +17,23 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { 
+  MdDashboard, 
+  MdAssessment, 
+  MdAttachMoney, 
+  MdPeople, 
+  MdSchool, 
+  MdSubscriptions,
+  MdBusiness,
+  MdAccountBalance,
+  MdTrendingUp,
+  MdBolt,
+  MdPersonAdd,
+  MdTrackChanges,
+  MdWallet,
+  MdCreditCard,
+  MdEmojiEvents
+} from 'react-icons/md';
 import './Dashboard.css';
 
 interface DashboardStats {
@@ -81,7 +98,7 @@ export const Dashboard = () => {
           {/* Header */}
           <div className="dashboard-header">
           <div>
-            <h1>📊 Admin Dashboard</h1>
+            <h1><MdDashboard style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Admin Dashboard</h1>
             <p className="dashboard-subtitle">Welcome back! Here's what's happening with your platform today.</p>
           </div>
           <div className="dashboard-tabs">
@@ -89,13 +106,13 @@ export const Dashboard = () => {
               className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
               onClick={() => setActiveTab('overview')}
             >
-              📋 Overview
+              <MdAssessment style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Overview
             </button>
             <button
               className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
               onClick={() => setActiveTab('analytics')}
             >
-              📈 Analytics
+              <MdTrendingUp style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Analytics
             </button>
           </div>
         </div>
@@ -105,7 +122,7 @@ export const Dashboard = () => {
             {/* Key Metrics */}
             <div className="metrics-grid">
               <div className="metric-card revenue">
-                <div className="metric-icon">💰</div>
+                <div className="metric-icon"><MdAttachMoney /></div>
                 <div className="metric-content">
                   <p className="metric-label">Total Revenue</p>
                   <h2 className="metric-value">${stats.financial.totalRevenue.toFixed(2)}</h2>
@@ -114,7 +131,7 @@ export const Dashboard = () => {
               </div>
 
               <div className="metric-card users">
-                <div className="metric-icon">👥</div>
+                <div className="metric-icon"><MdPeople /></div>
                 <div className="metric-content">
                   <p className="metric-label">Total Users</p>
                   <h2 className="metric-value">{stats.users.total}</h2>
@@ -123,7 +140,7 @@ export const Dashboard = () => {
               </div>
 
               <div className="metric-card coaches">
-                <div className="metric-icon">👨‍🏫</div>
+                <div className="metric-icon"><MdSchool /></div>
                 <div className="metric-content">
                   <p className="metric-label">Total Coaches</p>
                   <h2 className="metric-value">{stats.coaches.total}</h2>
@@ -132,7 +149,7 @@ export const Dashboard = () => {
               </div>
 
               <div className="metric-card subscriptions">
-                <div className="metric-icon">📦</div>
+                <div className="metric-icon"><MdSubscriptions /></div>
                 <div className="metric-content">
                   <p className="metric-label">Active Subscriptions</p>
                   <h2 className="metric-value">{stats.subscriptions.active}</h2>
@@ -143,32 +160,32 @@ export const Dashboard = () => {
 
             {/* Financial Overview */}
             <div className="financial-overview">
-              <h3 className="section-title">💼 Financial Overview</h3>
+              <h3 className="section-title"><MdAccountBalance style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Financial Overview</h3>
               <div className="financial-grid">
                 <div className="financial-card">
                   <div className="financial-header">
-                    <span className="financial-icon">🏢</span>
+                    <span className="financial-icon"><MdBusiness /></span>
                     <h4>System Earnings</h4>
                   </div>
                   <p className="financial-amount">${stats.financial.totalSystemEarnings.toFixed(2)}</p>
                 </div>
                 <div className="financial-card">
                   <div className="financial-header">
-                    <span className="financial-icon">👨‍🏫</span>
+                    <span className="financial-icon"><MdSchool /></span>
                     <h4>Coach Earnings</h4>
                   </div>
                   <p className="financial-amount">${stats.financial.totalCoachEarnings.toFixed(2)}</p>
                 </div>
                 <div className="financial-card">
                   <div className="financial-header">
-                    <span className="financial-icon">💰</span>
+                    <span className="financial-icon"><MdAttachMoney /></span>
                     <h4>Platform Balance</h4>
                   </div>
                   <p className="financial-amount">${stats.financial.totalPlatformBalance.toFixed(2)}</p>
                 </div>
                 <div className="financial-card">
                   <div className="financial-header">
-                    <span className="financial-icon">📊</span>
+                    <span className="financial-icon"><MdTrendingUp /></span>
                     <h4>Avg. Subscription</h4>
                   </div>
                   <p className="financial-amount">${stats.financial.averageSubscriptionValue.toFixed(2)}</p>
@@ -178,35 +195,35 @@ export const Dashboard = () => {
 
             {/* Quick Actions */}
             <div className="quick-actions-section">
-              <h3 className="section-title">⚡ Quick Actions</h3>
+              <h3 className="section-title"><MdBolt style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Quick Actions</h3>
               <div className="quick-actions-grid">
                 <button className="quick-action-card" onClick={() => navigate('/coaches')}>
-                  <div className="action-icon blue">👨‍🏫</div>
+                  <div className="action-icon blue"><MdSchool /></div>
                   <h4>Manage Coaches</h4>
                   <p>{stats.coaches.pending} pending approval</p>
                 </button>
                 <button className="quick-action-card" onClick={() => navigate('/users')}>
-                  <div className="action-icon green">👥</div>
+                  <div className="action-icon green"><MdPersonAdd /></div>
                   <h4>Manage Users</h4>
                   <p>{stats.users.total} total users</p>
                 </button>
                 <button className="quick-action-card" onClick={() => navigate('/strategies')}>
-                  <div className="action-icon purple">🎯</div>
+                  <div className="action-icon purple"><MdTrackChanges /></div>
                   <h4>Strategies</h4>
                   <p>{stats.overview.totalStrategies} strategies</p>
                 </button>
                 <button className="quick-action-card" onClick={() => navigate('/subscriptions')}>
-                  <div className="action-icon orange">📦</div>
+                  <div className="action-icon orange"><MdSubscriptions /></div>
                   <h4>Subscriptions</h4>
                   <p>{stats.subscriptions.active} active</p>
                 </button>
                 <button className="quick-action-card" onClick={() => navigate('/system-wallet')}>
-                  <div className="action-icon pink">💼</div>
+                  <div className="action-icon pink"><MdWallet /></div>
                   <h4>Wallets</h4>
                   <p>View all transactions</p>
                 </button>
                 <button className="quick-action-card" onClick={() => navigate('/payments-management')}>
-                  <div className="action-icon cyan">💳</div>
+                  <div className="action-icon cyan"><MdCreditCard /></div>
                   <h4>Payments</h4>
                   <p>Configure payment methods</p>
                 </button>
@@ -216,7 +233,7 @@ export const Dashboard = () => {
             {/* Status Overview */}
             <div className="status-overview-grid">
               <div className="status-card">
-                <h3 className="section-title">👥 Users Status</h3>
+                <h3 className="section-title"><MdPeople style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Users Status</h3>
                 <div className="status-list">
                   <div className="status-item">
                     <span className="status-dot green"></span>
@@ -242,7 +259,7 @@ export const Dashboard = () => {
               </div>
 
               <div className="status-card">
-                <h3 className="section-title">👨‍🏫 Coaches Status</h3>
+                <h3 className="section-title"><MdSchool style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Coaches Status</h3>
                 <div className="status-list">
                   <div className="status-item">
                     <span className="status-dot green"></span>
@@ -268,7 +285,7 @@ export const Dashboard = () => {
               </div>
 
               <div className="status-card">
-                <h3 className="section-title">📦 Subscriptions Status</h3>
+                <h3 className="section-title"><MdSubscriptions style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Subscriptions Status</h3>
                 <div className="status-list">
                   <div className="status-item">
                     <span className="status-dot green"></span>
@@ -297,7 +314,7 @@ export const Dashboard = () => {
             <div className="charts-section">
               {/* Monthly Revenue Chart */}
               <div className="chart-card">
-                <h3 className="chart-title">📈 Monthly Revenue (Last 6 Months)</h3>
+                <h3 className="chart-title"><MdTrendingUp style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Monthly Revenue (Last 6 Months)</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={stats.charts.monthlyRevenue}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -312,7 +329,7 @@ export const Dashboard = () => {
 
               {/* User Growth Chart */}
               <div className="chart-card">
-                <h3 className="chart-title">👥 User Growth (Last 7 Days)</h3>
+                <h3 className="chart-title"><MdPeople style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> User Growth (Last 7 Days)</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={stats.charts.userGrowth}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -328,7 +345,7 @@ export const Dashboard = () => {
               {/* Strategy Distribution Chart */}
               {stats.charts.strategyDistribution.length > 0 && (
                 <div className="chart-card">
-                  <h3 className="chart-title">🎯 Strategy Distribution</h3>
+                  <h3 className="chart-title"><MdTrackChanges style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Strategy Distribution</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
@@ -355,7 +372,7 @@ export const Dashboard = () => {
               {/* Top Coaches */}
               {stats.charts.topCoaches.length > 0 && (
                 <div className="chart-card">
-                  <h3 className="chart-title">🏆 Top 5 Coaches by Earnings</h3>
+                  <h3 className="chart-title"><MdEmojiEvents style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Top 5 Coaches by Earnings</h3>
                   <div className="top-coaches-list">
                     {stats.charts.topCoaches.map((coach: any, index: number) => (
                       <div key={index} className="top-coach-item">
