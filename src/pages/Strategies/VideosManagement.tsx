@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Hls from 'hls.js';
 import { Layout } from '../../components/Layout';
 import api from '../../services/api';
 import type { Strategy, StrategyVideo } from './types';
@@ -293,6 +294,141 @@ const VideoPlayerModal = ({
   video: StrategyVideo;
   onClose: () => void;
 }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const [videoStatus, setVideoStatus] = useState<'loading' | 'ready' | 'processing' | 'error'>('loading');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    console.log('🎬 VideoPlayerModal useEffect - video:', video);
+    console.log('🎬 Video URL:', video.videoUrl);
+    
+    if (!videoRef.current || !video.videoUrl) {
+      console.error('❌ Missing videoRef or videoUrl', { 
+        hasVideoRef: !!videoRef.current, 
+        videoUrl: video.videoUrl 
+      });
+      setVideoStatus('error');
+      setErrorMessage('Video URL is missing');
+      return;
+    }
+
+    const videoElement = videoRef.current;
+    const videoUrl = video.videoUrl;
+
+    console.log('🎬 Checking video type:', videoUrl);
+
+    // Check if video is HLS (Bunny.net) or MP4 (Firebase)
+    if (videoUrl.endsWith('.m3u8')) {
+      // HLS video from Bunny.net
+      console.log('🎬 Admin: Initializing HLS player');
+      setVideoStatus('loading');
+
+      if (Hls.isSupported()) {
+        console.log('✅ HLS.js is supported');
+        // Destroy previous HLS instance if exists
+        if (hlsRef.current) {
+          console.log('🗑️ Destroying previous HLS instance');
+          hlsRef.current.destroy();
+        }
+
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: false,
+          backBufferLength: 90,
+        });
+
+        console.log('📥 Loading HLS source:', videoUrl);
+        hls.loadSource(videoUrl);
+        hls.attachMedia(videoElement);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log('✅ Admin: HLS manifest loaded, attempting to play');
+          setVideoStatus('ready');
+          videoElement.play().then(() => {
+            console.log('✅ Video playing successfully');
+          }).catch(err => {
+            console.error('❌ Failed to play video:', err);
+            setVideoStatus('error');
+            setErrorMessage('Failed to play video: ' + err.message);
+          });
+        });
+
+        hls.on(Hls.Events.ERROR, (_event, data) => {
+          console.error('❌ HLS Error:', data);
+          if (data.fatal) {
+            console.error('❌ Admin: Fatal HLS error:', data);
+            
+            // Check if it's a 404 (video still processing)
+            if (data.response?.code === 404 || data.details === 'manifestLoadError') {
+              setVideoStatus('processing');
+              setErrorMessage('Video is still being processed by Bunny.net. This usually takes 2-5 minutes. Please try again in a few moments.');
+              console.log('🔄 Video still processing on Bunny.net');
+            } else {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  console.log('🔄 Network error, trying to recover...');
+                  hls.startLoad();
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  console.log('🔄 Media error, trying to recover...');
+                  hls.recoverMediaError();
+                  break;
+                default:
+                  console.error('💥 Unrecoverable error, destroying HLS');
+                  setVideoStatus('error');
+                  setErrorMessage('Failed to load video: ' + (data.details || 'Unknown error'));
+                  hls.destroy();
+                  break;
+              }
+            }
+          }
+        });
+
+        hlsRef.current = hls;
+      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        // Native HLS support (Safari)
+        console.log('🍎 Using native HLS support (Safari)');
+        videoElement.src = videoUrl;
+        videoElement.play().then(() => {
+          console.log('✅ Video playing with native HLS');
+          setVideoStatus('ready');
+        }).catch(err => {
+          console.error('❌ Failed to play with native HLS:', err);
+          setVideoStatus('error');
+          setErrorMessage('Failed to play video: ' + err.message);
+        });
+      } else {
+        console.error('❌ HLS not supported in this browser');
+        setVideoStatus('error');
+        setErrorMessage('HLS streaming not supported in this browser');
+      }
+    } else {
+      // Regular MP4 video
+      console.log('🎥 Loading MP4 video:', videoUrl);
+      setVideoStatus('loading');
+      videoElement.src = videoUrl;
+      videoElement.load();
+      videoElement.onloadeddata = () => {
+        console.log('✅ MP4 video loaded');
+        setVideoStatus('ready');
+      };
+      videoElement.onerror = () => {
+        console.error('❌ Failed to load MP4 video');
+        setVideoStatus('error');
+        setErrorMessage('Failed to load video file');
+      };
+    }
+
+    // Cleanup
+    return () => {
+      console.log('🧹 Cleaning up HLS instance');
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+    };
+  }, [video.videoUrl]);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content video-player-modal" onClick={(e) => e.stopPropagation()}>
@@ -303,7 +439,33 @@ const VideoPlayerModal = ({
 
         <div className="modal-body video-player-body">
           <div className="video-player-container">
+            {videoStatus === 'processing' && (
+              <div className="video-processing-overlay">
+                <div className="processing-content">
+                  <div className="spinner"></div>
+                  <h3>⏳ Video Processing</h3>
+                  <p>{errorMessage}</p>
+                  <button className="btn-primary" onClick={onClose}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {videoStatus === 'error' && !errorMessage.includes('processing') && (
+              <div className="video-error-overlay">
+                <div className="error-content">
+                  <h3>❌ Error</h3>
+                  <p>{errorMessage}</p>
+                  <button className="btn-secondary" onClick={onClose}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+
             <video
+              ref={videoRef}
               controls
               autoPlay
               controlsList="nodownload"
@@ -311,9 +473,9 @@ const VideoPlayerModal = ({
               className="video-player"
               poster={video.coverPhotoUrl}
               onContextMenu={(e) => e.preventDefault()}
+              style={{ display: videoStatus === 'processing' || (videoStatus === 'error' && !errorMessage.includes('processing')) ? 'none' : 'block' }}
             >
-              <source src={video.videoUrl} type="video/mp4" />
-              <source src={video.videoUrl} type="video/webm" />
+              {/* Source will be set by HLS.js or directly for MP4 */}
               Your browser does not support the video tag.
             </video>
           </div>

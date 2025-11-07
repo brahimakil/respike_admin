@@ -59,19 +59,29 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
       let videoUrl = video.videoUrl;
       let coverPhotoUrl = coverPhotoPreview;
 
-      // Upload new video if provided (directly to Firebase Storage)
+      // Upload new video if provided (to Bunny.net through backend)
       if (newVideo) {
-        setUploadStatus(`Uploading new video (${storageService.formatBytes(newVideo.size)})...`);
+        setUploadStatus(`Uploading new video to Bunny.net (${storageService.formatBytes(newVideo.size)})...`);
         try {
-          videoUrl = await storageService.uploadVideo(newVideo, strategyId, (progress) => {
-            const percentage = Math.round(progress.progress * 0.7); // 70% of total progress
-            setUploadProgress(percentage);
-            setUploadStatus(
-              `Uploading video: ${storageService.formatBytes(progress.bytesTransferred)} / ${storageService.formatBytes(progress.totalBytes)} (${Math.round(progress.progress)}%)`
-            );
+          const videoFormData = new FormData();
+          videoFormData.append('video', newVideo);
+          
+          const videoUploadResponse = await api.post(`/strategies/${strategyId}/videos/upload-video`, videoFormData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            onUploadProgress: (progressEvent) => {
+              if (progressEvent.total) {
+                const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 70);
+                setUploadProgress(percentage);
+                setUploadStatus(
+                  `Uploading video: ${storageService.formatBytes(progressEvent.loaded)} / ${storageService.formatBytes(progressEvent.total)} (${Math.round((progressEvent.loaded / progressEvent.total) * 100)}%)`
+                );
+              }
+            },
           });
+          
+          videoUrl = videoUploadResponse.data.url;
           setUploadProgress(70);
-          setUploadStatus('Video uploaded successfully! ✅');
+          setUploadStatus('Video uploaded to Bunny.net successfully! ✅');
         } catch (uploadError) {
           console.error('Error uploading video:', uploadError);
           setError('Failed to upload video. Please check your connection and try again.');

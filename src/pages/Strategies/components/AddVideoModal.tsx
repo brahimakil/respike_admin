@@ -63,18 +63,28 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
       let videoUrl = '';
       let coverPhotoUrl = '';
 
-      // Upload video directly to Firebase Storage
-      setUploadStatus(`Uploading video (${storageService.formatBytes(video.size)})...`);
+      // Upload video to Bunny.net through backend
+      setUploadStatus(`Uploading video to Bunny.net (${storageService.formatBytes(video.size)})...`);
       try {
-        videoUrl = await storageService.uploadVideo(video, strategyId, (progress) => {
-          const percentage = Math.round(progress.progress * 0.7); // 70% of total progress
-          setUploadProgress(percentage);
-          setUploadStatus(
-            `Uploading video: ${storageService.formatBytes(progress.bytesTransferred)} / ${storageService.formatBytes(progress.totalBytes)} (${Math.round(progress.progress)}%)`
-          );
+        const videoFormData = new FormData();
+        videoFormData.append('video', video);
+        
+        const videoUploadResponse = await api.post(`/strategies/${strategyId}/videos/upload-video`, videoFormData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 70);
+              setUploadProgress(percentage);
+              setUploadStatus(
+                `Uploading video: ${storageService.formatBytes(progressEvent.loaded)} / ${storageService.formatBytes(progressEvent.total)} (${Math.round((progressEvent.loaded / progressEvent.total) * 100)}%)`
+              );
+            }
+          },
         });
+        
+        videoUrl = videoUploadResponse.data.url;
         setUploadProgress(70);
-        setUploadStatus('Video uploaded successfully! ✅');
+        setUploadStatus('Video uploaded to Bunny.net successfully! ✅');
       } catch (uploadError) {
         console.error('Error uploading video:', uploadError);
         setError('Failed to upload video. Please check your connection and try again.');
