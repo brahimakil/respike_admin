@@ -480,7 +480,7 @@ const VideoPlayerModal = ({
             <video
               ref={videoRef}
               controls
-              autoPlay
+              playsInline
               controlsList="nodownload"
               disablePictureInPicture
               className="video-player"
