@@ -2,6 +2,7 @@ import { useState } from 'react';
 import api from '../../../services/api';
 import { storageService } from '../../../services/storage.service';
 import { uploadVideoToBunny } from '../../../services/bunny.service';
+import { authService } from '../../../services/auth.service';
 
 interface AddVideoModalProps {
   strategyId: string;
@@ -114,6 +115,14 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
       // Create video record in database
       setUploadProgress(90);
       setUploadStatus('Saving video details...');
+      
+      // Refresh auth token before saving (in case upload took a long time)
+      try {
+        await authService.refreshToken();
+      } catch (tokenError) {
+        console.warn('⚠️ Failed to refresh token, continuing anyway...', tokenError);
+      }
+      
       await api.post(`/strategies/${strategyId}/videos`, {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -167,7 +176,7 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
                   <div className="upload-placeholder">
                     <span className="upload-icon">🎬</span>
                     <span>{video ? `${video.name} (${storageService.formatBytes(video.size)})` : 'Click to upload video'}</span>
-                    <span className="upload-hint">Supported: MP4, WebM, MOV • Max: 1GB</span>
+                    <span className="upload-hint">Supported: MP4, WebM, MOV • Max: 2GB</span>
                   </div>
                 </label>
               </div>

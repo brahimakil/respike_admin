@@ -3,6 +3,7 @@ import api from '../../../services/api';
 import type { StrategyVideo } from '../types';
 import { storageService } from '../../../services/storage.service';
 import { uploadVideoToBunny } from '../../../services/bunny.service';
+import { authService } from '../../../services/auth.service';
 
 interface EditVideoModalProps {
   strategyId: string;
@@ -112,6 +113,14 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
       // Update video record in database
       setUploadProgress(90);
       setUploadStatus('Saving video details...');
+      
+      // Refresh auth token before saving (in case upload took a long time)
+      try {
+        await authService.refreshToken();
+      } catch (tokenError) {
+        console.warn('⚠️ Failed to refresh token, continuing anyway...', tokenError);
+      }
+      
       await api.put(`/strategies/${strategyId}/videos/${video.id}`, {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -165,7 +174,7 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
                   <div className="upload-placeholder">
                     <span className="upload-icon">🎬</span>
                     <span>{newVideo ? `${newVideo.name} (${storageService.formatBytes(newVideo.size)})` : 'Click to upload new video'}</span>
-                    <span className="upload-hint">Leave empty to keep current video • Max: 1GB</span>
+                    <span className="upload-hint">Leave empty to keep current video • Max: 2GB</span>
                   </div>
                 </label>
               </div>

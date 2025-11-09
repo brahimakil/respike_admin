@@ -89,5 +89,14 @@ export const authService = {
     }
     return null;
   },
+
+  async refreshToken(): Promise<string | null> {
+    const user = auth.currentUser;
+    if (user) {
+      // Force refresh the token
+      return await user.getIdToken(true);
+    }
+    return null;
+  },
 };
 
