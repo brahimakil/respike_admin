@@ -170,7 +170,11 @@ export const VideosManagement = () => {
           </div>
         ) : (
           <div className="videos-list">
-            {videos.map((video) => (
+            {videos.map((video) => {
+              // Check if video is from Bunny.net and might be processing
+              const isBunnyVideo = video.videoUrl?.includes('.m3u8');
+              
+              return (
               <div key={video.id} className={`video-item ${!video.isVisible ? 'hidden-video' : ''}`}>
                 <div className="video-order-controls">
                   <button
@@ -195,6 +199,9 @@ export const VideosManagement = () => {
                 {video.coverPhotoUrl && (
                   <div className="video-thumbnail">
                     <img src={video.coverPhotoUrl} alt={video.title} />
+                    {isBunnyVideo && (
+                      <div className="bunny-badge" title="Bunny.net Stream">🐰</div>
+                    )}
                     <div className="play-overlay">▶</div>
                   </div>
                 )}
@@ -204,6 +211,11 @@ export const VideosManagement = () => {
                     <h3 className="video-title">{video.title}</h3>
                     {!video.isVisible && (
                       <span className="hidden-badge">👁️ Hidden</span>
+                    )}
+                    {isBunnyVideo && (
+                      <span className="bunny-badge-inline" title="Bunny.net HLS Stream">
+                        ⚡ HLS
+                      </span>
                     )}
                   </div>
                   <p className="video-description">{video.description}</p>
@@ -246,7 +258,8 @@ export const VideosManagement = () => {
                   </button>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
 

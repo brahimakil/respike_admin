@@ -2,6 +2,7 @@ import { useState } from 'react';
 import api from '../../../services/api';
 import type { StrategyVideo } from '../types';
 import { storageService } from '../../../services/storage.service';
+import { uploadVideoToBunny } from '../../../services/bunny.service';
 
 interface EditVideoModalProps {
   strategyId: string;
@@ -57,29 +58,22 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
 
     try {
       let videoUrl = video.videoUrl;
+      let bunnyVideoId = video.bunnyVideoId || '';
       let coverPhotoUrl = coverPhotoPreview;
 
-      // Upload new video if provided (to Bunny.net through backend)
+      // Upload new video if provided (DIRECTLY to Bunny.net to avoid Vercel limits)
       if (newVideo) {
         setUploadStatus(`Uploading new video to Bunny.net (${storageService.formatBytes(newVideo.size)})...`);
         try {
-          const videoFormData = new FormData();
-          videoFormData.append('video', newVideo);
-          
-          const videoUploadResponse = await api.post(`/strategies/${strategyId}/videos/upload-video`, videoFormData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-            onUploadProgress: (progressEvent) => {
-              if (progressEvent.total) {
-                const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 70);
-                setUploadProgress(percentage);
-                setUploadStatus(
-                  `Uploading video: ${storageService.formatBytes(progressEvent.loaded)} / ${storageService.formatBytes(progressEvent.total)} (${Math.round((progressEvent.loaded / progressEvent.total) * 100)}%)`
-                );
-              }
-            },
+          const bunnyResult = await uploadVideoToBunny(newVideo, (progress) => {
+            setUploadProgress(progress * 0.7); // Use 70% of progress bar
+            setUploadStatus(
+              `Uploading video to Bunny.net: ${progress}%`
+            );
           });
           
-          videoUrl = videoUploadResponse.data.url;
+          videoUrl = bunnyResult.playbackUrl;
+          bunnyVideoId = bunnyResult.videoId;
           setUploadProgress(70);
           setUploadStatus('Video uploaded to Bunny.net successfully! ✅');
         } catch (uploadError) {
@@ -116,6 +110,7 @@ export const EditVideoModal = ({ strategyId, video, onClose, onSuccess }: EditVi
         title: formData.title.trim(),
         description: formData.description.trim(),
         videoUrl,
+        bunnyVideoId, // Save bunnyVideoId for future fallback logic
         coverPhotoUrl: coverPhotoUrl || undefined,
       });
 

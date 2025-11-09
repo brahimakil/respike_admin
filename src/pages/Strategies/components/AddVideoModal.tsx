@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../../../services/api';
 import { storageService } from '../../../services/storage.service';
+import { uploadVideoToBunny } from '../../../services/bunny.service';
 
 interface AddVideoModalProps {
   strategyId: string;
@@ -61,28 +62,21 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
 
     try {
       let videoUrl = '';
+      let bunnyVideoId = '';
       let coverPhotoUrl = '';
 
-      // Upload video to Bunny.net through backend
+      // Upload video DIRECTLY to Bunny.net (bypass backend to avoid Vercel limits)
       setUploadStatus(`Uploading video to Bunny.net (${storageService.formatBytes(video.size)})...`);
       try {
-        const videoFormData = new FormData();
-        videoFormData.append('video', video);
-        
-        const videoUploadResponse = await api.post(`/strategies/${strategyId}/videos/upload-video`, videoFormData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total) {
-              const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 70);
-              setUploadProgress(percentage);
-              setUploadStatus(
-                `Uploading video: ${storageService.formatBytes(progressEvent.loaded)} / ${storageService.formatBytes(progressEvent.total)} (${Math.round((progressEvent.loaded / progressEvent.total) * 100)}%)`
-              );
-            }
-          },
+        const bunnyResult = await uploadVideoToBunny(video, (progress) => {
+          setUploadProgress(progress * 0.7); // Use 70% of progress bar
+          setUploadStatus(
+            `Uploading video to Bunny.net: ${progress}%`
+          );
         });
         
-        videoUrl = videoUploadResponse.data.url;
+        videoUrl = bunnyResult.playbackUrl;
+        bunnyVideoId = bunnyResult.videoId;
         setUploadProgress(70);
         setUploadStatus('Video uploaded to Bunny.net successfully! ✅');
       } catch (uploadError) {
@@ -118,6 +112,7 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
         title: formData.title.trim(),
         description: formData.description.trim(),
         videoUrl,
+        bunnyVideoId, // Save bunnyVideoId for future fallback logic
         coverPhotoUrl: coverPhotoUrl || undefined,
       });
 

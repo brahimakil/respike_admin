@@ -19,6 +19,7 @@ export interface StrategyVideo {
   title: string;
   description: string;
   videoUrl: string;
+  bunnyVideoId?: string; // Bunny.net video ID for graceful fallback
   coverPhotoUrl?: string;
   isVisible: boolean; // Show/hide video
   createdAt: Date;
