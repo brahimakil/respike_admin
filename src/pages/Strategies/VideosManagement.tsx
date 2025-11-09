@@ -356,15 +356,9 @@ const VideoPlayerModal = ({
         hls.attachMedia(videoElement);
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log('✅ Admin: HLS manifest loaded, attempting to play');
+          console.log('✅ Admin: HLS manifest loaded');
           setVideoStatus('ready');
-          videoElement.play().then(() => {
-            console.log('✅ Video playing successfully');
-          }).catch(err => {
-            console.error('❌ Failed to play video:', err);
-            setVideoStatus('error');
-            setErrorMessage('Failed to play video: ' + err.message);
-          });
+          // Don't auto-play - let user click play button (required for mobile)
         });
 
         hls.on(Hls.Events.ERROR, (_event, data) => {
@@ -403,14 +397,8 @@ const VideoPlayerModal = ({
         // Native HLS support (Safari)
         console.log('🍎 Using native HLS support (Safari)');
         videoElement.src = videoUrl;
-        videoElement.play().then(() => {
-          console.log('✅ Video playing with native HLS');
-          setVideoStatus('ready');
-        }).catch(err => {
-          console.error('❌ Failed to play with native HLS:', err);
-          setVideoStatus('error');
-          setErrorMessage('Failed to play video: ' + err.message);
-        });
+        setVideoStatus('ready');
+        // Don't auto-play - let user click play button (required for mobile)
       } else {
         console.error('❌ HLS not supported in this browser');
         setVideoStatus('error');
