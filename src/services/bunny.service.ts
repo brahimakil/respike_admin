@@ -31,6 +31,7 @@ export const uploadVideoToBunny = async (
           AccessKey: BUNNY_API_KEY,
           'Content-Type': 'application/json',
         },
+        timeout: 30000, // 30 seconds for API call
       }
     );
 
@@ -55,7 +56,7 @@ export const uploadVideoToBunny = async (
         },
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
-        timeout: 600000, // 10 minutes
+        timeout: 0, // No timeout for large file uploads
       }
     );
 
@@ -70,7 +71,17 @@ export const uploadVideoToBunny = async (
     };
   } catch (error: any) {
     console.error('❌ [Bunny] Upload failed:', error);
-    throw new Error(error.response?.data?.message || 'Failed to upload video to Bunny.net');
+    
+    // More detailed error message
+    if (error.code === 'ECONNABORTED') {
+      throw new Error('Upload timed out. Please check your internet connection and try again.');
+    } else if (error.code === 'ERR_NETWORK') {
+      throw new Error('Network error. Please check your internet connection.');
+    } else if (error.response?.status === 413) {
+      throw new Error('File is too large for upload.');
+    } else {
+      throw new Error(error.response?.data?.message || error.message || 'Failed to upload video to Bunny.net');
+    }
   }
 };
 

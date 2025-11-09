@@ -79,9 +79,9 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
         bunnyVideoId = bunnyResult.videoId;
         setUploadProgress(70);
         setUploadStatus('Video uploaded to Bunny.net successfully! ✅');
-      } catch (uploadError) {
+      } catch (uploadError: any) {
         console.error('Error uploading video:', uploadError);
-        setError('Failed to upload video. Please check your connection and try again.');
+        setError(uploadError.message || 'Failed to upload video. Please check your connection and try again.');
         setLoading(false);
         return;
       }
