@@ -39,6 +39,12 @@ export const AddVideoModal = ({ strategyId, nextOrder, onClose, onSuccess }: Add
     const file = e.target.files?.[0];
     if (file) {
       setVideo(file);
+      
+      // Show warning for very large files
+      const sizeInGB = file.size / (1024 * 1024 * 1024);
+      if (sizeInGB > 1.5) {
+        console.warn(`⚠️ Large file selected: ${sizeInGB.toFixed(2)}GB - Upload may take a while`);
+      }
     }
   };
 
