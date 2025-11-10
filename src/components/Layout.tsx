@@ -8,7 +8,6 @@ import {
   MdPeople, 
   MdShowChart, 
   MdAccountBalanceWallet, 
-  MdPayment, 
   MdAdminPanelSettings, 
   MdSubscriptions, 
   MdSettings,
@@ -106,14 +105,6 @@ export const Layout = ({ children }: LayoutProps) => {
           </a>
           <a 
             href="#" 
-            className={`nav-item ${location.pathname === '/payments-management' ? 'active' : ''}`} 
-            onClick={(e) => { e.preventDefault(); navigate('/payments-management'); closeSidebar(); }}
-          >
-            <span className="nav-icon"><MdPayment /></span>
-            <span className="nav-text">Payments Management</span>
-          </a>
-          <a 
-            href="#" 
             className={`nav-item ${location.pathname === '/admin-management' ? 'active' : ''}`} 
             onClick={(e) => { e.preventDefault(); navigate('/admin-management'); closeSidebar(); }}
           >
@@ -183,8 +174,6 @@ function getPageTitle(pathname: string): string {
       return 'Strategies';
     case '/system-wallet':
       return 'System Wallet';
-    case '/payments-management':
-      return 'Payments Management';
     case '/admin-management':
       return 'Admin Management';
     case '/subscriptions':

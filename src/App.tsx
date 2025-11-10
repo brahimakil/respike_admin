@@ -13,7 +13,6 @@ import { Users } from './pages/Users';
 import { Strategies } from './pages/Strategies/index';
 import { VideosManagement } from './pages/Strategies/VideosManagement';
 import { SystemWallet } from './pages/SystemWallet';
-import { PaymentsManagement } from './pages/PaymentsManagement';
 import { AdminManagement } from './pages/AdminManagement';
 import { Subscriptions } from './pages/Subscriptions/index';
 import { Settings } from './pages/Settings/index';
@@ -111,15 +110,6 @@ function App() {
           element={
             <ProtectedRoute>
               <SystemWallet />
-            </ProtectedRoute>
-          }
-        />
-        
-        <Route
-          path="/payments-management"
-          element={
-            <ProtectedRoute>
-              <PaymentsManagement />
             </ProtectedRoute>
           }
         />

@@ -12,7 +12,7 @@ export interface Subscription {
   endDate: Date;
   duration: number;
   videoProgress: VideoProgress[];
-  completedVideos: number;
+  completedVideos: number | string[]; // Can be array or number
   totalVideos: number;
   progressPercentage: number;
   currentVideoId?: string;
@@ -20,6 +20,7 @@ export interface Subscription {
   previousStrategyPrice?: number;
   amountPaid: number;
   renewalCount: number;
+  paymentMethod?: string;
   createdAt: Date;
   updatedAt: Date;
   expiredAt?: Date;

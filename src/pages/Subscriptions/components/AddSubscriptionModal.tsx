@@ -41,6 +41,9 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
     duration: '30',
     durationType: 'days', // 'days' or 'minutes'
     coachCommissionPercentage: '30', // Default 30%
+    amountPaid: '', // Total amount paid (backend expects amountPaid)
+    paymentMethod: 'manual', // Payment method for manual subscriptions
+    notes: '', // Admin notes
   });
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -138,6 +141,11 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
       return;
     }
 
+    if (!formData.amountPaid || parseFloat(formData.amountPaid) < 0) {
+      setError('Please enter a valid total amount');
+      return;
+    }
+
     const duration = parseInt(formData.duration);
     if (isNaN(duration) || duration < 1) {
       setError(`Duration must be at least 1 ${formData.durationType === 'minutes' ? 'minute' : 'day'}`);
@@ -153,13 +161,21 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
         : duration;
 
       const commissionPercentage = parseFloat(formData.coachCommissionPercentage);
+      const amountPaid = parseFloat(formData.amountPaid);
 
-      await api.post('/subscriptions', {
+      const requestBody = {
         userId: formData.userId,
         strategyId: formData.strategyId,
         duration: durationInDays,
         coachCommissionPercentage: commissionPercentage,
-      });
+        amountPaid, // Send as amountPaid (backend expects this)
+        paymentMethod: formData.paymentMethod,
+        notes: formData.notes || undefined,
+      };
+
+      console.log('📤 [FRONTEND] Sending subscription request:', requestBody);
+
+      await api.post('/subscriptions', requestBody);
 
       onSuccess();
     } catch (error: any) {
@@ -313,7 +329,15 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
               </label>
               <select
                 value={formData.strategyId}
-                onChange={(e) => setFormData({ ...formData, strategyId: e.target.value })}
+                onChange={(e) => {
+                  const strategyId = e.target.value;
+                  const strategy = strategies.find(s => s.id === strategyId);
+                  setFormData({ 
+                    ...formData, 
+                    strategyId,
+                    amountPaid: strategy ? strategy.price.toString() : ''
+                  });
+                }}
                 required
               >
                 <option value="">-- Select Strategy --</option>
@@ -361,35 +385,70 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
               </small>
             </div>
 
+            {/* Payment fields - OUTSIDE info-box */}
             {selectedStrategy && (
-              <div className="info-box">
-                <h4>💰 Payment Information</h4>
-                <p>
-                  <strong>Strategy Price:</strong> ${selectedStrategy.price.toFixed(2)}
-                </p>
-                <p>
-                  <strong>Duration:</strong> {formData.duration} {formData.durationType}
-                  {formData.durationType === 'minutes' && (
-                    <span style={{ color: '#f59e0b', marginLeft: '0.5rem' }}>
-                      (⚠️ Testing mode)
-                    </span>
-                  )}
-                </p>
-                {endDate && (
-                  <p style={{ 
-                    background: 'rgba(74, 144, 226, 0.1)', 
-                    padding: '0.75rem', 
-                    borderRadius: '6px',
-                    marginTop: '0.75rem',
-                    borderLeft: '3px solid #4a90e2'
-                  }}>
-                    <strong>📅 Subscription Will End:</strong><br />
-                    {formatDate(endDate)}
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  {/* Editable Total Amount */}
+                  <div className="form-group">
+                    <label>
+                      Total Amount ($) <span className="required">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.amountPaid}
+                      onChange={(e) => setFormData({ ...formData, amountPaid: e.target.value })}
+                      placeholder={selectedStrategy.price.toFixed(2)}
+                      required
+                    />
+                    <small className="help-text">
+                      Default: ${selectedStrategy.price.toFixed(2)}
+                    </small>
+                  </div>
+                </div>
+
+                {/* Notes - Full width */}
+                <div className="form-group">
+                  <label>Notes (Optional)</label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder="e.g., Paid via bank transfer, cash payment, PayPal, etc."
+                    rows={2}
+                    style={{ resize: 'vertical', minHeight: '60px' }}
+                  />
+                </div>
+
+                {/* Info box with Duration/End Date/Split */}
+                <div className="info-box">
+                  <h4>💰 Payment Summary</h4>
+                  
+                  <p style={{ margin: '0 0 0.5rem 0' }}>
+                    <strong>Duration:</strong> {formData.duration} {formData.durationType}
+                    {formData.durationType === 'minutes' && (
+                      <span style={{ color: '#f59e0b', marginLeft: '0.5rem' }}>
+                        (⚠️ Testing mode)
+                      </span>
+                    )}
                   </p>
-                )}
+                  
+                  {endDate && (
+                    <p style={{ 
+                      background: 'rgba(74, 144, 226, 0.1)', 
+                      padding: '0.75rem', 
+                      borderRadius: '6px',
+                      margin: '0 0 1rem 0',
+                      borderLeft: '3px solid #4a90e2'
+                    }}>
+                      <strong>📅 Subscription Will End:</strong><br />
+                      {formatDate(endDate)}
+                    </p>
+                  )}
                 
                 {/* Commission Split Display */}
-                {hasCoach && selectedUser && (
+                {hasCoach && selectedUser && formData.amountPaid && (
                   <div style={{
                     background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%)',
                     padding: '1rem',
@@ -406,7 +465,7 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
                           👨‍🏫 Coach ({formData.coachCommissionPercentage}%):
                         </span>
                         <strong style={{ color: '#059669', fontSize: '1.1rem' }}>
-                          ${((selectedStrategy.price * parseFloat(formData.coachCommissionPercentage)) / 100).toFixed(2)}
+                          ${((parseFloat(formData.amountPaid) * parseFloat(formData.coachCommissionPercentage)) / 100).toFixed(2)}
                         </strong>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -414,7 +473,7 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
                           🏢 System ({(100 - parseFloat(formData.coachCommissionPercentage)).toFixed(1)}%):
                         </span>
                         <strong style={{ color: '#3b82f6', fontSize: '1.1rem' }}>
-                          ${(selectedStrategy.price - (selectedStrategy.price * parseFloat(formData.coachCommissionPercentage)) / 100).toFixed(2)}
+                          ${(parseFloat(formData.amountPaid) - (parseFloat(formData.amountPaid) * parseFloat(formData.coachCommissionPercentage)) / 100).toFixed(2)}
                         </strong>
                       </div>
                       <div style={{ 
@@ -425,7 +484,7 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontWeight: 600, color: '#1e293b' }}>Total:</span>
                           <strong style={{ fontSize: '1.2rem', color: '#1e293b' }}>
-                            ${selectedStrategy.price.toFixed(2)}
+                            ${parseFloat(formData.amountPaid).toFixed(2)}
                           </strong>
                         </div>
                       </div>
@@ -433,24 +492,21 @@ export const AddSubscriptionModal = ({ onClose, onSuccess }: AddSubscriptionModa
                   </div>
                 )}
 
-                {!hasCoach && selectedUser && (
+                {!hasCoach && selectedUser && formData.amountPaid && (
                   <p style={{
                     background: 'rgba(59, 130, 246, 0.1)',
                     padding: '0.75rem',
                     borderRadius: '6px',
-                    marginTop: '0.75rem',
+                    margin: 0,
                     borderLeft: '3px solid #3b82f6',
                     color: '#3b82f6',
                     fontSize: '0.9rem'
                   }}>
-                    💼 Full amount (${selectedStrategy.price.toFixed(2)}) goes to system wallet
+                    💼 Full amount (${parseFloat(formData.amountPaid).toFixed(2)}) goes to system wallet
                   </p>
                 )}
-
-                <p className="note">
-                  The user will be charged the full strategy price for the first subscription.
-                </p>
-              </div>
+                </div>
+              </>
             )}
           </div>
 

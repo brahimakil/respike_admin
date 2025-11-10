@@ -841,5 +841,248 @@
   .status-tab {
     width: 100%;
   }
+
+  .subscriptions-table-container {
+    overflow-x: auto;
+  }
 }
 
+/* ============================================ */
+/* TABLE LAYOUT */
+/* ============================================ */
+
+.subscriptions-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.subscriptions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.subscriptions-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.subscriptions-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.subscriptions-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s;
+}
+
+.subscriptions-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.subscriptions-table td {
+  padding: 1rem;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+/* User Cell */
+.user-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-cell strong {
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.user-cell small {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* Strategy Cell */
+.strategy-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.strategy-cell strong {
+  color: #1e293b;
+}
+
+.strategy-cell small {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* Status Badges */
+.status-badge-active {
+  background: #10b981;
+  color: white;
+}
+
+.status-badge-pending {
+  background: #f59e0b;
+  color: white;
+}
+
+.status-badge-expired {
+  background: #ef4444;
+  color: white;
+}
+
+.status-badge-cancelled {
+  background: #6b7280;
+  color: white;
+}
+
+/* Text Colors */
+.text-success {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.text-warning {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.text-danger {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Progress Cell */
+.progress-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 150px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4a90e2, #667eea);
+  transition: width 0.3s ease;
+}
+
+.progress-cell small {
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+/* Payment Method Badges */
+.payment-method-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-manual {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-automatic {
+  background: #cffafe;
+  color: #155e75;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 0.4rem 0.6rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  background: #f1f5f9;
+}
+
+.btn-sm:hover {
+  transform: scale(1.1);
+}
+
+.btn-view:hover {
+  background: #4a90e2;
+}
+
+.btn-renew:hover {
+  background: #10b981;
+}
+
+.btn-pending:hover {
+  background: #f59e0b;
+}
+
+.btn-cancel:hover {
+  background: #ef4444;
+}
+
+.btn-delete:hover {
+  background: #ef4444;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.pagination-btn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #cbd5e1;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #1e293b;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #4a90e2;
+  color: white;
+  border-color: #4a90e2;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}

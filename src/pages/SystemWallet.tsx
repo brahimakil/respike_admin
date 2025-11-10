@@ -54,6 +54,9 @@ export const SystemWallet = () => {
   
   const [showCashoutModal, setShowCashoutModal] = useState(false);
   const [allWallets, setAllWallets] = useState<Wallet[]>([]);
+  
+  // Payment method filter
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'manual' | 'automatic'>('all');
 
   useEffect(() => {
     fetchSystemWallet();
@@ -142,6 +145,39 @@ export const SystemWallet = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const formatDescription = (transaction: WalletTransaction) => {
+    // Just return the description without adding payment method label
+    // since it's now shown in the Type column
+    return transaction.description;
+  };
+
+  // Filter transactions by payment method
+  const getFilteredTransactions = (transactions: WalletTransaction[]) => {
+    if (paymentFilter === 'all') {
+      return transactions;
+    }
+    
+    return transactions.filter(transaction => {
+      const paymentMethod = transaction.metadata?.paymentMethod;
+      
+      if (paymentFilter === 'manual') {
+        return paymentMethod === 'manual';
+      } else if (paymentFilter === 'automatic') {
+        return paymentMethod === '3pay' || paymentMethod === 'automatic';
+      }
+      
+      return true;
+    });
+  };
+
+  // Calculate filtered balance
+  const getFilteredBalance = (transactions: WalletTransaction[]) => {
+    const filtered = getFilteredTransactions(transactions);
+    return filtered.reduce((sum, t) => {
+      return t.type === 'credit' ? sum + t.amount : sum - t.amount;
+    }, 0);
   };
 
   const filteredCoaches = coaches.filter(coach =>
@@ -267,6 +303,65 @@ export const SystemWallet = () => {
           <div className="transactions-section">
             <div className="section-header">
               <h3>📜 Recent Transactions</h3>
+              
+              {/* Payment Method Filter */}
+              <div className="filter-buttons" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button
+                  className={paymentFilter === 'all' ? 'filter-btn active' : 'filter-btn'}
+                  onClick={() => setPaymentFilter('all')}
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px',
+                    background: paymentFilter === 'all' ? '#007bff' : 'white',
+                    color: paymentFilter === 'all' ? 'white' : '#333',
+                    cursor: 'pointer',
+                    fontWeight: paymentFilter === 'all' ? '600' : '400',
+                  }}
+                >
+                  All ({systemTransactions.length})
+                </button>
+                <button
+                  className={paymentFilter === 'manual' ? 'filter-btn active' : 'filter-btn'}
+                  onClick={() => setPaymentFilter('manual')}
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px',
+                    background: paymentFilter === 'manual' ? '#28a745' : 'white',
+                    color: paymentFilter === 'manual' ? 'white' : '#333',
+                    cursor: 'pointer',
+                    fontWeight: paymentFilter === 'manual' ? '600' : '400',
+                  }}
+                >
+                  Manual ({systemTransactions.filter(t => t.metadata?.paymentMethod === 'manual').length})
+                </button>
+                <button
+                  className={paymentFilter === 'automatic' ? 'filter-btn active' : 'filter-btn'}
+                  onClick={() => setPaymentFilter('automatic')}
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px',
+                    background: paymentFilter === 'automatic' ? '#17a2b8' : 'white',
+                    color: paymentFilter === 'automatic' ? 'white' : '#333',
+                    cursor: 'pointer',
+                    fontWeight: paymentFilter === 'automatic' ? '600' : '400',
+                  }}
+                >
+                  Automatic ({systemTransactions.filter(t => t.metadata?.paymentMethod === '3pay' || t.metadata?.paymentMethod === 'automatic').length})
+                </button>
+              </div>
+
+              {/* Show filtered balance */}
+              {paymentFilter !== 'all' && (
+                <div style={{ marginTop: '12px', padding: '10px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6' }}>
+                  <strong>{paymentFilter === 'manual' ? 'Manual' : 'Automatic'} Balance:</strong>{' '}
+                  <span style={{ fontSize: '1.1em', fontWeight: '600', color: '#28a745' }}>
+                    ${getFilteredBalance(systemTransactions).toFixed(2)}
+                  </span>
+                </div>
+              )}
             </div>
 
             {systemTransactions.length === 0 ? (
@@ -286,20 +381,37 @@ export const SystemWallet = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {systemTransactions.slice(0, 10).map((transaction) => (
-                      <tr key={transaction.id} className={`transaction-row ${transaction.type}`}>
-                        <td className="date-cell">{formatDate(transaction.createdAt)}</td>
-                        <td>
-                          <span className={`type-badge ${transaction.type}`}>
-                            {transaction.type === 'credit' ? '➕ Credit' : '➖ Debit'}
-                          </span>
-                        </td>
-                        <td className={`amount-cell ${transaction.type}`}>
-                          {transaction.type === 'credit' ? '+' : '-'}${transaction.amount.toFixed(2)}
-                        </td>
-                        <td className="description-cell">
-                          <div className="description-content">
-                            <p className="description-text">{transaction.description}</p>
+                    {getFilteredTransactions(systemTransactions).slice(0, 10).map((transaction) => {
+                      const paymentMethod = transaction.metadata?.paymentMethod;
+                      const isManual = paymentMethod === 'manual';
+                      
+                      return (
+                        <tr key={transaction.id} className={`transaction-row ${transaction.type}`}>
+                          <td className="date-cell">{formatDate(transaction.createdAt)}</td>
+                          <td>
+                            {paymentMethod ? (
+                              <span className={`type-badge ${isManual ? 'manual' : 'automatic'}`} style={{
+                                background: isManual ? '#28a745' : '#17a2b8',
+                                color: 'white',
+                                padding: '4px 12px',
+                                borderRadius: '12px',
+                                fontSize: '0.85em',
+                                fontWeight: '600'
+                              }}>
+                                {isManual ? '📝 Manual' : '⚡ Automatic'}
+                              </span>
+                            ) : (
+                              <span className={`type-badge ${transaction.type}`}>
+                                {transaction.type === 'credit' ? '➕ Credit' : '➖ Debit'}
+                              </span>
+                            )}
+                          </td>
+                          <td className={`amount-cell ${transaction.type}`}>
+                            {transaction.type === 'credit' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                          </td>
+                          <td className="description-cell">
+                            <div className="description-content">
+                            <p className="description-text">{formatDescription(transaction)}</p>
                             {transaction.referenceType && (
                               <span className="reference-badge">
                                 {transaction.referenceType}
@@ -309,11 +421,15 @@ export const SystemWallet = () => {
                         </td>
                         <td className="balance-cell">${transaction.balanceAfter.toFixed(2)}</td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
-                {systemTransactions.length > 10 && (
-                  <p className="showing-info">Showing latest 10 of {systemTransactions.length} transactions</p>
+                {getFilteredTransactions(systemTransactions).length > 10 && (
+                  <p className="showing-info">
+                    Showing latest 10 of {getFilteredTransactions(systemTransactions).length} 
+                    {paymentFilter !== 'all' ? ` ${paymentFilter}` : ''} transactions
+                  </p>
                 )}
               </div>
             )}
@@ -450,7 +566,7 @@ export const SystemWallet = () => {
                             </td>
                             <td className="description-cell">
                               <div className="description-content">
-                                <p className="description-text">{transaction.description}</p>
+                                <p className="description-text">{formatDescription(transaction)}</p>
                                 {transaction.referenceType && (
                                   <span className="reference-badge">
                                     {transaction.referenceType}

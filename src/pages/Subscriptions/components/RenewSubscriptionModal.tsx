@@ -144,11 +144,25 @@ export const RenewSubscriptionModal = ({
     try {
       const customAmount = parseFloat(formData.customAmount);
       
-      await api.post(`/subscriptions/${subscription.id}/renew`, {
+      const requestBody: any = {
         duration,
-        newStrategyId: formData.newStrategyId !== subscription.strategyId ? formData.newStrategyId : undefined,
-        customAmount: formData.newStrategyId === subscription.strategyId ? customAmount : undefined,
-      });
+        coachCommissionPercentage: commissionPercentage, // Send the calculated commission
+        paymentMethod: 'manual', // All admin renewals are manual
+      };
+
+      // Only include newStrategyId if switching strategies
+      if (formData.newStrategyId !== subscription.strategyId) {
+        requestBody.newStrategyId = formData.newStrategyId;
+      }
+
+      // Only include customAmount for same-strategy renewals
+      if (formData.newStrategyId === subscription.strategyId) {
+        requestBody.customAmount = customAmount;
+      }
+
+      console.log('📤 [RENEWAL] Sending renewal request:', requestBody);
+      
+      await api.post(`/subscriptions/${subscription.id}/renew`, requestBody);
 
       onSuccess();
     } catch (error: any) {
